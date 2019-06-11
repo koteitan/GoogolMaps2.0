@@ -1,9 +1,19 @@
+// maps
+var maps;
+/* spread sheetId = source */
+//var spreadsheetId = "1-Mo_pc4HOavJucJfyIo-vkKKESnWEfjkkJJ4zTyfzjQ";
+var spreadsheetId = "11WH6PrhFAcdMEWSTjxSjZ7_rWHg-b8shAvSFn99bdyQ";
+// graphics
+var ctx = outcanvas.getContext('2d');
+var fontsize = 15;
+var radius = 15;
+
 /* Entry object 
  * Entry is the object of each large number. 
  * line = response.feed.entry[n] */
 var Entry=function(line){
   var col = line.content.$t.split(",");
-  this.order   = col[0].split(": ")[1];
+  this.order   = parseInt(col[0].split(": ")[1]);
   this.year    = col[1].split(": ")[1];
   this.name    = col[2].split(": ")[1];
   this.lname   = col[3].split(": ")[1];
@@ -67,10 +77,7 @@ var Maps=function(list){
 
 /* entry point */
 var main=function(){
-  /* sheet via ajax */
-  var spreadsheetId = "1-Mo_pc4HOavJucJfyIo-vkKKESnWEfjkkJJ4zTyfzjQ",
-//  var spreadsheetId = "11WH6PrhFAcdMEWSTjxSjZ7_rWHg-b8shAvSFn99bdyQ",
-    url = "https://spreadsheets.google.com/feeds/list/" +
+  var url = "https://spreadsheets.google.com/feeds/list/" +
           spreadsheetId +
           "/od6/public/basic?alt=json";
   $.get({
@@ -94,6 +101,8 @@ var main2=function(res){
   }
   /* make a maps */
   maps = new Maps(entrylist);
+  /* draw */
+  procdraw();
 
   /* for debug */
   var str="";
@@ -104,5 +113,27 @@ var main2=function(res){
   document.getElementById("debug").innerHTML = str;
 }
 
-var maps; //maps
 
+var procdraw = function(){
+  //dra wbackground
+  ctx.fillStyle="white";
+  ctx.fillRect(0,0,outcanvas.width,outcanvas.height);
+  //draw text
+  ctx.strokeStyle='black';
+  ctx.fillStyle='black';
+  ctx.font = String(fontsize)+'px Segoe UI';
+  for(var e=0;e<maps.entrylist.length;e++){
+    var entry  = maps.entrylist[e];
+    var text   = entry.name;
+    var textwidth  = ctx.measureText(text).width;
+    var textheight = fontsize;
+    var x = (outcanvas.width*(entry.x*0.8+0.1))-textwidth/2;
+    var y = (outcanvas.height*(entry.y*0.8+0.1))-textheight/2;
+    var ix = Math.floor(x);
+    var iy = outcanvas.height-Math.floor(y);
+    ctx.fillText(text,ix,iy);
+    ctx.beginPath();
+    ctx.arc(ix,iy,radius,0,2*Math.PI,false);
+    ctx.stroke();
+  }
+}
