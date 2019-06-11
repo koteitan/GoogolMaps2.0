@@ -102,19 +102,12 @@ var main2=function(res){
   /* make a maps */
   maps = new Maps(entrylist);
   /* draw */
-  procdraw();
-
-  /* for debug */
-  var str="";
-  for(var e=0;e<entries;e++){
-    str = str + entrylist[e].toString();
-    str = str + "\n";
-  }
-  document.getElementById("debug").innerHTML = str;
+  isSheetLoaded = true;
+  isRequestedDraw = true;
 }
 
 
-var procdraw = function(){
+var procDraw = function(){
   //dra wbackground
   ctx.fillStyle="white";
   ctx.fillRect(0,0,outcanvas.width,outcanvas.height);
@@ -135,5 +128,33 @@ var procdraw = function(){
     ctx.beginPath();
     ctx.arc(ix,iy,radius,0,2*Math.PI,false);
     ctx.stroke();
+  }
+}
+var frameRate = 60; //[fps]
+window.onload = function(){
+  main();
+  window.onresize();
+  setInterval(procAll,1000/frameRate);
+}
+window.onresize = function(){
+  var wx,wy;
+  var agent = navigator.userAgent;
+  if( agent.search(/iPhone/) != -1 || agent.search(/iPod/) != -1 || agent.search(/iPad/) != -1){
+    wx = 512;
+    wy = 512;
+  }else{
+    var wx= [(document.documentElement.clientWidth-10)*0.99, 320].max();
+    var wy= [(document.documentElement.clientHeight-10)*0.9, 20].max();
+  }
+  document.getElementById("outcanvas").width = wx;
+  document.getElementById("outcanvas").height= wy;
+  isRequestedDraw = true;
+};
+var isRequestedDraw = true;
+var isSheetLoaded = false;
+var procAll=function(){
+  if(isRequestedDraw && isSheetLoaded){
+    procDraw();
+    isRequestedDraw = false;
   }
 }
