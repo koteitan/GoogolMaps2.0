@@ -62,14 +62,20 @@ var initHtml=function(){
  * line = response.feed.entry[n] */
 var Entry=function(line){
   var col = line.content.$t.split(",");
-  this.order   = parseInt(col[0].split(": ")[1]);
-  this.year    = col[1].split(": ")[1];
-  this.name    = col[2].split(": ")[1];
-  this.lname   = col[3].split(": ")[1];
-  this.author  = col[4].split(": ")[1];
-  this.lauthor = col[5].split(": ")[1];
-  this.locale  = col[6].split(": ")[1];
-  this.exp     = col[7].split(": ")[1];
+  for (var i=0;i<col.length;i++){
+    if (col[i].indexOf(": ")==-1){
+      col[i-1]+=","+col[i];
+      col.splice(i,1);
+      i--;
+    }
+  }
+  var attributes="order,year,name,lname,author,lauthor,locale,expression,fgh,evolvedfrom,related,color".split(",");
+  for (var i=0;i<attributes.length;i++){
+    this[attributes[i]]  = col[i]?col[i].split(": ")[1]:"";
+  }
+  this.order=parseInt(this.order);
+  this.evolvedfrom=this.evolvedfrom.split("/");
+  this.related=this.related.split("/");
 }
 Entry.prototype.toString = function(){
   return this.year + ":" + this.name + "(" + this.order + ")";
@@ -173,6 +179,8 @@ var procDraw = function(){
     ctx.fillText(text, Math.floor(sq[0]-tx/2),
                        Math.floor(sq[1]-ty/2));
     //circle
+    ctx.strokeStyle=entry.color;
+    ctx.lineWidth=4;
     ctx.beginPath();
     ctx.arc(Math.floor(sq[0]), 
             Math.floor(sq[1]), radius, 0, 2*Math.PI,false);
