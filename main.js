@@ -151,7 +151,7 @@ window.onresize = function(){
   var wx,wy;
   var agent = navigator.userAgent;
   var wx= [(document.documentElement.clientWidth-10)*0.99, 320].max();
-  var wy= [(document.documentElement.clientHeight-10)*0.8, 20].max();
+  var wy= [(document.documentElement.clientHeight-195), 20].max();
   document.getElementById("outcanvas").width = wx;
   document.getElementById("outcanvas").height= wy;
   isRequestedDraw = true;
