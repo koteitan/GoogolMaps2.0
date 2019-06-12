@@ -139,13 +139,8 @@ window.onload = function(){
 window.onresize = function(){
   var wx,wy;
   var agent = navigator.userAgent;
-  if( agent.search(/iPhone/) != -1 || agent.search(/iPod/) != -1 || agent.search(/iPad/) != -1){
-    wx = 512;
-    wy = 512;
-  }else{
-    var wx= [(document.documentElement.clientWidth-10)*0.99, 320].max();
-    var wy= [(document.documentElement.clientHeight-10)*0.9, 20].max();
-  }
+  var wx= [(document.documentElement.clientWidth-10)*0.99, 320].max();
+  var wy= [(document.documentElement.clientHeight-10)*0.9, 20].max();
   document.getElementById("outcanvas").width = wx;
   document.getElementById("outcanvas").height= wy;
   isRequestedDraw = true;
