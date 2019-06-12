@@ -1,15 +1,61 @@
+// fields--------------------
 // maps
 var maps;
-/* spread sheetId = source */
-//var spreadsheetId = "1-Mo_pc4HOavJucJfyIo-vkKKESnWEfjkkJJ4zTyfzjQ";
-var spreadsheetId = "11WH6PrhFAcdMEWSTjxSjZ7_rWHg-b8shAvSFn99bdyQ";
-// graphics
-var ctx = outcanvas.getContext('2d');
-var fontsize = 15;
-var radius = 15;
-var isRequestedDraw = true;
-var isSheetLoaded = false;
-var frameRate = 60; //[fps]
+//var spreadsheetId = "1-Mo_pc4HOavJucJfyIo-vkKKESnWEfjkkJJ4zTyfzjQ"; //for staging 
+var spreadsheetId = "11WH6PrhFAcdMEWSTjxSjZ7_rWHg-b8shAvSFn99bdyQ"; // for live
+var gW; /* world coordinate */
+//entry point--------------------
+window.onload = function(){
+  initHtml(); //get locale option
+  initMaps(); //use local option
+  initDraw();
+  initEvent();
+  window.onresize(); //after loading maps
+  setInterval(procAll, 1000/frameRate); //enter gameloop
+}
+//maps-------------------
+var initMaps=function(){
+  var url = "https://spreadsheets.google.com/feeds/list/" +
+          spreadsheetId +
+          "/od6/public/basic?alt=json";
+  $.get({
+    url: url,
+    success: function(response) {
+      initMaps2(response); /* set callback and continue to initMaps2*/
+    }
+  });
+  var m = 0.1; //default margin
+  gW = new Geom(2,[[0-m,0-m],[1+m,1+m]]);
+};
+/* continued from main(). */
+var initMaps2=function(res){
+  /* res -> parse -> entrylist[n] */
+  var sheet = res.feed.entry;
+  var entries = sheet.length;
+  entrylist = [];
+  for(var e=0;e<entries;e++){
+    var entry = new Entry(sheet[e]);
+    entrylist.push(entry);
+  }
+  /* make a maps */
+  maps = new Maps(entrylist);
+  /* draw */
+  isSheetLoaded = true;
+  isRequestedDraw = true;
+}
+//game loop ------------------
+var procAll=function(){
+  procEvent();
+  if(isRequestedDraw && isSheetLoaded){
+    procDraw();
+    isRequestedDraw = false;
+  }
+}
+var initHtml=function(){
+  if(navigator.language=='ja'){
+    document.getElementsByName('locale')[1].checked = true;
+  }
+}
 
 /* Entry object 
  * Entry is the object of each large number. 
@@ -77,77 +123,8 @@ var Maps=function(list){
   }
   a=1;
 }
-
-/* entry point */
-var main=function(){
-  var url = "https://spreadsheets.google.com/feeds/list/" +
-          spreadsheetId +
-          "/od6/public/basic?alt=json";
-  $.get({
-    url: url,
-    success: function(response) {
-      main2(response); /* set callback and continue to main2 */
-    }
-  });
-};
-
-/* continued from main(). */
-var main2=function(res){
-
-  /* res -> parse -> entrylist[n] */
-  var sheet = res.feed.entry;
-  var entries = sheet.length;
-  entrylist = [];
-  for(var e=0;e<entries;e++){
-    var entry = new Entry(sheet[e]);
-    entrylist.push(entry);
-  }
-  /* make a maps */
-  maps = new Maps(entrylist);
-  /* draw */
-  isSheetLoaded = true;
-  isRequestedDraw = true;
-}
-
-
-var procDraw = function(){
-  //dra wbackground
-  ctx.fillStyle="white";
-  ctx.fillRect(0,0,outcanvas.width,outcanvas.height);
-  //draw text
-  ctx.strokeStyle='black';
-  ctx.fillStyle='black';
-  ctx.font = String(fontsize)+'px Segoe UI';
-  for(var e=0;e<maps.entrylist.length;e++){
-    var entry  = maps.entrylist[e];
-    var text;
-    if(document.getElementsByName('locale')[1].checked){
-      text = entry.lname;
-    }else{
-      text = entry.name;
-    }
-    var textwidth  = ctx.measureText(text).width;
-    var textheight = fontsize;
-    var x = (outcanvas.width*(entry.x*0.8+0.1))-textwidth/2;
-    var y = (outcanvas.height*(entry.y*0.8+0.1))-textheight/2;
-    var ix = Math.floor(x);
-    var iy = outcanvas.height-Math.floor(y);
-    ctx.fillText(text,ix,iy);
-    ctx.beginPath();
-    ctx.arc(ix,iy,radius,0,2*Math.PI,false);
-    ctx.stroke();
-  }
-}
 // Event listeners ----------------------------
-window.onload = function(){
-  if(navigator.language=='ja'){
-    document.getElementsByName('locale')[1].checked = true;
-  }
-  main();
-  window.onresize();
-  setInterval(procAll, 1000/frameRate);
-}
-window.onresize = function(){
+window.onresize = function(){ //browser resize
   var wx,wy;
   var agent = navigator.userAgent;
   var wx= [(document.documentElement.clientWidth-10)*0.99, 320].max();
@@ -156,13 +133,98 @@ window.onresize = function(){
   document.getElementById("outcanvas").height= wy;
   isRequestedDraw = true;
 };
-var procAll=function(){
-  if(isRequestedDraw && isSheetLoaded){
-    procDraw();
-    isRequestedDraw = false;
+var changelocale=function(){ // form option button
+  isRequestedDraw = true;
+}
+// graphics ------------------------
+var ctx;
+var can;
+var gS;
+var fontsize = 15;
+var radius = 15;
+var isRequestedDraw = true;
+var isSheetLoaded = false;
+var frameRate = 60; //[fps]
+//init
+var initDraw=function(){
+  can = document.getElementById("outcanvas");
+  ctx = can.getContext('2d'); 
+  ww = [can.width, can.height];
+  gS = new Geom(2,[[0,ww[1]],[ww[0],0]]);
+}
+//proc
+var procDraw = function(){
+  //dra wbackground
+  ctx.fillStyle="white";
+  ctx.fillRect(0,0,can.width, can.height);
+  //draw text
+  ctx.strokeStyle='black';
+  ctx.fillStyle='black';
+  ctx.font = String(fontsize)+'px Segoe UI';
+  for(var e=0;e<maps.entrylist.length;e++){
+    var entry  = maps.entrylist[e];
+    var sq = transPos([entry.x, entry.y],gW,gS); //center of entry
+    //text
+    var text=document.getElementsByName('locale')[1].checked
+      ?entry.lname
+      :entry.name;
+    var tx = ctx.measureText(text).width;
+    var ty = fontsize;
+    ctx.fillText(text, Math.floor(sq[0]-tx/2),
+                       Math.floor(sq[1]-ty/2));
+    //circle
+    ctx.beginPath();
+    ctx.arc(Math.floor(sq[0]), 
+            Math.floor(sq[1]), radius, 0, 2*Math.PI,false);
+    ctx.stroke();
   }
 }
-var changelocale=function(){
+//event---------------------
+var isKeyTyping;
+//init
+var initEvent = function(){
+  eventQueue = [];
+  can.ontouchstart = addTouchEvent;
+  can.ontouchmove  = addTouchEvent;
+  can.ontouchend   = addTouchEvent;
+  can.onmousedown  = addEvent;
+  can.onmousemove  = addEvent;
+  can.onmouseup    = addEvent;
+  can.onmouseout   = addEvent;
+  can.onmousewheel = addEvent;
+//  window.onkeydown       = addEvent;
+};
+var downpos=[-1,-1];// start of drag
+var movpos =[-1,-1];// while drag
+var handleMouseDown = function(){
+  downpos = transPos(mouseDownPos,gS,gW);
+  movpos[0] = downpos[0];
+  movpos[1] = downpos[1];
+}
+var handleMouseDragging = function(){
+  movpos = transPos(mousePos,gS,gW);
+  for(var i=0;i<2;i++){
+    for(var d=0;d<2;d++){
+      gW.w[i][d] -= movpos[d]-downpos[d];
+    }
+  }
+  isRequestedDraw = true;
+}
+var handleMouseUp = function(){
+  isRequestedDraw = true;
+}
+var handleMouseWheel = function(){
+  var pos=transPos(mousePos,gS,gW);
+  var oldw=gW.w.clone();
+  for(var i=0;i<2;i++){
+    for(var d=0;d<2;d++){
+      gW.w[i][d] = (oldw[i][d]-pos[d])*Math.pow(1.1, -mouseWheel[1]/1000)+pos[d];
+    }
+  }
+  for(var d=0;d<gW.dims;d++){
+    gW.ww[d] = gW.w[1][d] - gW.w[0][d];
+    gW.iww[d] = 1/gW.ww[d];
+  }
   isRequestedDraw = true;
 }
 

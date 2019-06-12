@@ -79,6 +79,7 @@ var procEvent = function(){
       if(isMouseOver){
         mouseTarget = parseInt(e.target.id.substr(-1));
         mouseWheel = [e.wheelDeltaX, e.wheelDeltaY];
+        mousePos   = removeClientOffset(e);
         handleMouseWheel();
       }
       break;
