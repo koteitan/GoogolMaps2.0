@@ -63,6 +63,9 @@ var procEvent = function(){
         e.x = e.touches[0].clientX;
         e.y = e.touches[0].clientY;
         mousePos   = removeClientOffset(e);
+        if(isDragging){
+          handleMouseDragging();
+        }
       break;
       case "touchend":   // mouse up ---------
         mouseUpPos = mousePos.clone();
