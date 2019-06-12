@@ -1,9 +1,13 @@
 <html>
-  <head><title>Googol Maps 2.0</title>
+<head><title>Googol Maps 2.0</title>
 </head>
 <body>
-  <h2>Googol Maps 2.0</h2>
-<canvas id="outcanvas" width=600px height=600px style="border-style:solid"></canvas>
+<h2>Googol Maps 2.0</h2>
+<canvas id="outcanvas" width=600px height=600px style="border-style:solid"></canvas><br>
+<form name="form0">
+  <input type=radio name='locale' value=en onchange="javascript:changelocale();">English
+  <input type=radio name='locale' value=ja onchange="javascript:changelocale();">Japanese
+</form>
 <!textarea id="debug" cols=50 rows=10><!/textarea>
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.0.min.js">
 //--</script>

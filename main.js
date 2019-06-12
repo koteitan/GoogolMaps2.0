@@ -7,6 +7,9 @@ var spreadsheetId = "11WH6PrhFAcdMEWSTjxSjZ7_rWHg-b8shAvSFn99bdyQ";
 var ctx = outcanvas.getContext('2d');
 var fontsize = 15;
 var radius = 15;
+var isRequestedDraw = true;
+var isSheetLoaded = false;
+var frameRate = 60; //[fps]
 
 /* Entry object 
  * Entry is the object of each large number. 
@@ -117,7 +120,12 @@ var procDraw = function(){
   ctx.font = String(fontsize)+'px Segoe UI';
   for(var e=0;e<maps.entrylist.length;e++){
     var entry  = maps.entrylist[e];
-    var text   = entry.name;
+    var text;
+    if(document.getElementsByName('locale')[1].checked){
+      text = entry.lname;
+    }else{
+      text = entry.name;
+    }
     var textwidth  = ctx.measureText(text).width;
     var textheight = fontsize;
     var x = (outcanvas.width*(entry.x*0.8+0.1))-textwidth/2;
@@ -130,26 +138,31 @@ var procDraw = function(){
     ctx.stroke();
   }
 }
-var frameRate = 60; //[fps]
+// Event listeners ----------------------------
 window.onload = function(){
+  if(navigator.language=='ja'){
+    document.getElementsByName('locale')[1].checked = true;
+  }
   main();
   window.onresize();
-  setInterval(procAll,1000/frameRate);
+  setInterval(procAll, 1000/frameRate);
 }
 window.onresize = function(){
   var wx,wy;
   var agent = navigator.userAgent;
   var wx= [(document.documentElement.clientWidth-10)*0.99, 320].max();
-  var wy= [(document.documentElement.clientHeight-10)*0.9, 20].max();
+  var wy= [(document.documentElement.clientHeight-10)*0.8, 20].max();
   document.getElementById("outcanvas").width = wx;
   document.getElementById("outcanvas").height= wy;
   isRequestedDraw = true;
 };
-var isRequestedDraw = true;
-var isSheetLoaded = false;
 var procAll=function(){
   if(isRequestedDraw && isSheetLoaded){
     procDraw();
     isRequestedDraw = false;
   }
 }
+var changelocale=function(){
+  isRequestedDraw = true;
+}
+
