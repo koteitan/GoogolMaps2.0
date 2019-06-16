@@ -1,4 +1,4 @@
-document.getElementById("versiondisplay").innerHTML = "0.1";
+document.getElementById("versiondisplay").innerHTML = "0.2";
 document.getElementById("changelog").innerHTML = 
 "<ul>"+
 "<li>2018/05/31 trial for parsing sheet.</li>"+

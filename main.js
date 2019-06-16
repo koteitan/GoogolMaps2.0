@@ -170,14 +170,7 @@ var procDraw = function(){
   for(var e=0;e<maps.entrylist.length;e++){
     var entry  = maps.entrylist[e];
     var sq = transPos([entry.x, entry.y],gW,gS); //center of entry
-    //text
-    var text=document.getElementsByName('locale')[1].checked
-      ?entry.lname
-      :entry.name;
-    var tx = ctx.measureText(text).width;
-    var ty = fontsize;
-    ctx.fillText(text, Math.floor(sq[0]-tx/2),
-                       Math.floor(sq[1]-ty/2));
+    
     //circle
     ctx.strokeStyle=entry.color;
     ctx.lineWidth=4;
@@ -185,6 +178,15 @@ var procDraw = function(){
     ctx.arc(Math.floor(sq[0]), 
             Math.floor(sq[1]), radius, 0, 2*Math.PI,false);
     ctx.stroke();
+
+    //text
+    var text=document.getElementsByName('locale')[1].checked
+      ?entry.lname
+      :entry.name;
+    var tx = ctx.measureText(text).width;
+    var ty = fontsize+radius;
+    ctx.fillText(text, Math.floor(sq[0]-tx/2),
+                       Math.floor(sq[1]-ty/2));
   }
 }
 //event---------------------
