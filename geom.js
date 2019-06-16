@@ -20,6 +20,13 @@ var Geom = function(_dims, _w){
     this.iww[d] = 1/this.ww[d];
   }
 };
+/* recalc */
+Geom.prototype.recalc = function(){
+  for(var d=0;d<this.dims;d++){
+    this.ww[d] = this.w[1][d] - this.w[0][d];
+    this.iww[d] = 1/this.ww[d];
+  }
+};
 /*---------------------------------------
 Camera(_dims, _w[][])
 _dims  = ŽŸŒ³”
@@ -47,6 +54,13 @@ var transPos=function(x, g0, g1){
   var y = new Array(g0.dims);
   for(var d=0;d<g0.dims;d++){
     y[d] = (x[d]-g0.w[0][d])*g0.iww[d]*g1.ww[d]+g1.w[0][d];
+  }
+  return y;
+};
+var transPosInt=function(x, g0, g1){
+  var y = new Array(g0.dims);
+  for(var d=0;d<g0.dims;d++){
+    y[d] = Math.floor((x[d]-g0.w[0][d])*g0.iww[d]*g1.ww[d]+g1.w[0][d]);
   }
   return y;
 };
