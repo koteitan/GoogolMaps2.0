@@ -52,6 +52,7 @@ var procAll=function(){
   }
 }
 var initHtml=function(){
+  debug = document.getElementById('debug');
   if(navigator.language=='ja'){
     document.getElementsByName('locale')[1].checked = true;
   }
@@ -129,12 +130,13 @@ var Maps=function(list){
   }
   a=1;
 }
-// Event listeners ----------------------------
+// html ----------------------------
+var debug;
 window.onresize = function(){ //browser resize
   var wx,wy;
   var agent = navigator.userAgent;
   var wx= [(document.documentElement.clientWidth-10)*0.99, 320].max();
-  var wy= [(document.documentElement.clientHeight-195), 20].max();
+  var wy= [(document.documentElement.clientHeight-200), 20].max();
   document.getElementById("outcanvas").width = wx;
   document.getElementById("outcanvas").height= wy;
   renewgS();
@@ -178,16 +180,19 @@ var procDraw = function(){
   //grid line -----------------------
   //get screen in world coordinate
   var scr = [transPos([0,can.height], gS, gW), transPos([can.width,0], gS, gW)];
-  var L=Math.log10(scr[1][0]-scr[0][0]);
+  var base=8;
+  var L=Math.log10(scr[1][0]-scr[0][0])/Math.log10(base);
   var intL=Math.floor(L);
   var fracL=L-intL;
-  var intL =Math.pow(10,intL);
-  var fracL=Math.pow(10,fracL);
+  var intL =Math.pow(base,intL);
+  var fracL=Math.pow(base,fracL)/base;
   var depths = 3;
+  //debug.innerHTML = "intL="+intL+"\n";
+  //debug.innerHTML += "fracL="+fracL+"\n";
   for(var depth=depths-1;depth>=0;depth--){
-    var qw = intL/Math.pow(10,depth);
-    var c = Math.floor(fracL*depth/depths*128+127);
-
+    var qw = intL/Math.pow(base,depth);
+    var c = Math.floor(((depth+fracL)/depths)*64+64+127);
+    //debug.innerHTML += "c("+depth+") = "+c+"\n";
     ctx.lineWidth=1;
     ctx.strokeStyle='rgb('+c+','+c+','+c+')';
     for(var d=0;d<gW.dims;d++){
