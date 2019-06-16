@@ -2,6 +2,7 @@
   event.js
   GUI event control. queueing the 
   events and process in serial order.
+  See Appendix for detail.
 ----------------------------------*/
 //events ----------------------
 //variables
@@ -125,3 +126,53 @@ var removeClientOffset = function(e){
   }
   return [e.x, e.y];
 };
+/*--------------------------------------------------------
+  Appendix:
+
+    Usage:
+
+      Using event.js, user can easily add the mouse/touch events doing below:
+      (1) Include event.js in HTML.
+      (2) Call initEvent(can) before your game loop begins. 
+          The parameter can is your canvas object.
+      (3) Call procEvent() in your game loop.
+      (4) Write handlers you like.
+      That's all!
+
+    Handlers references:
+
+      Handler functions:
+        handleMouseDown()     = Getting mouse button pressing. (or tap)
+        handleMouseUp()       = Getting mouse button releasing (or exit to outside of GUI).
+        handleMouseDragging() = Getting mouse dragging between press and release. (or swipe)
+        handleMouseMove()     = Getting mouse moving without press.
+        handleKeyDown()       = Getting key down
+        handleMouseWheel()    = Getting mouse wheel motion.
+      variables:
+        mouseDownPos[d] = mouse position in d th dimension (d=0 is x, d=1 is y)
+        mousePos[d]     = mouse position (handleMouse{Dragging, Mode, Wheel})
+        mouseWheel[d]   = mouse wheel rotation mount in d th dimension. unit is unknown.
+
+    How it works in details:
+      (1) initEvent() adds event listeners of your canvas.
+      (2) When an event occurs, the event listener addEvent() or addTouchEvent() is
+          called from another process.
+      (3) The event listeners add the event into eventQueue and quit this process.
+      (4) procEvent() in your game loop is watching eventQueue and call a proper handler.
+      (5) Your handler works.
+      That's all!
+
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
