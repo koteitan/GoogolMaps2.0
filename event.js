@@ -15,14 +15,41 @@ var isShiftKey = false;
 var mouseDownPos = [-1,-1];
 var mousePos     = [-1,-1];
 var mouseUpPos   = [-1,-1];
-// procedure
-var removeClientOffset = function(e){
-  if(e.target.getBoundingClientRect){
-    var rect = e.target.getBoundingClientRect();
-    return [e.x-rect.left, e.y-rect.top];
-  }
-  return [e.x, e.y];
+var isKeyTyping;
+//init
+var initEvent = function(can){
+  eventQueue = [];
+  can.ontouchstart = addTouchEvent;
+  can.ontouchmove  = addTouchEvent;
+  can.ontouchend   = addTouchEvent;
+  can.onmousedown  = addEvent;
+  can.onmousemove  = addEvent;
+  can.onmouseup    = addEvent;
+  can.onmouseout   = addEvent;
+  can.onmousewheel = addEvent;
+//  window.onkeydown       = addEvent;
 };
+// addEvent(Event e)
+var addEvent = function(e){
+  if(e.type=="mousewheel"){
+    var a=1;
+  }
+  if(eventQueue.length < eventsMax && e!=undefined){
+    eventQueue.push(e);
+    lastEvent = e;//for debug
+  }
+  if(e.type!="keydown" || e.type=="mousewheel"){
+    if(!isKeyTyping && isMouseOver){
+      if(e.preventDefault) e.preventDefault();
+      e.returnValue = false;
+    }
+  }
+};
+var addTouchEvent = function(){
+  event.preventDefault();
+  eventQueue.push(event);
+}
+// process in game loop
 var procEvent = function(){
   while(eventQueue.length>0){
     var e = eventQueue.shift(); // <MouseEvent>
@@ -91,24 +118,10 @@ var procEvent = function(){
     }
   }
 };
-// sub routines
-// addEvent(Event e)
-var addEvent = function(e){
-  if(e.type=="mousewheel"){
-    var a=1;
+var removeClientOffset = function(e){
+  if(e.target.getBoundingClientRect){
+    var rect = e.target.getBoundingClientRect();
+    return [e.x-rect.left, e.y-rect.top];
   }
-  if(eventQueue.length < eventsMax && e!=undefined){
-    eventQueue.push(e);
-    lastEvent = e;//for debug
-  }
-  if(e.type!="keydown" || e.type=="mousewheel"){
-    if(!isKeyTyping && isMouseOver){
-      if(e.preventDefault) e.preventDefault();
-      e.returnValue = false;
-    }
-  }
+  return [e.x, e.y];
 };
-var addTouchEvent = function(){
-  event.preventDefault();
-  eventQueue.push(event);
-}

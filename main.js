@@ -9,7 +9,7 @@ window.onload = function(){
   initHtml(); //get locale option
   initMaps(); //use local option
   initDraw();
-  initEvent();
+  initEvent(can);
   window.onresize(); //after loading maps
   setInterval(procAll, 1000/frameRate); //enter gameloop
 }
@@ -239,20 +239,6 @@ var procDraw = function(){
   }
 }
 //event---------------------
-var isKeyTyping;
-//init
-var initEvent = function(){
-  eventQueue = [];
-  can.ontouchstart = addTouchEvent;
-  can.ontouchmove  = addTouchEvent;
-  can.ontouchend   = addTouchEvent;
-  can.onmousedown  = addEvent;
-  can.onmousemove  = addEvent;
-  can.onmouseup    = addEvent;
-  can.onmouseout   = addEvent;
-  can.onmousewheel = addEvent;
-//  window.onkeydown       = addEvent;
-};
 var downpos=[-1,-1];// start of drag
 var movpos =[-1,-1];// while drag
 var handleMouseDown = function(){
