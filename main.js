@@ -137,6 +137,7 @@ window.onresize = function(){ //browser resize
   var wy= [(document.documentElement.clientHeight-195), 20].max();
   document.getElementById("outcanvas").width = wx;
   document.getElementById("outcanvas").height= wy;
+  renewgS();
   isRequestedDraw = true;
 };
 var changelocale=function(){ // form option button
@@ -154,16 +155,59 @@ var frameRate = 60; //[fps]
 //init
 var initDraw=function(){
   can = document.getElementById("outcanvas");
-  ctx = can.getContext('2d'); 
-  ww = [can.width, can.height];
-  gS = new Geom(2,[[0,ww[1]],[ww[0],0]]);
+  ctx = can.getContext('2d');
+  renewgS();
+}
+var renewgS=function(){
+  var maxw=[can.width, can.height].max();
+  var minw=[can.width, can.height].min();
+  var maxd=[can.width, can.height].argmax();
+  var margin=(maxw-minw)/2;
+  var s=[[0,minw],[minw,0]];
+  s[0][maxd]+=margin;
+  s[1][maxd]+=margin;
+  gS = new Geom(2,s);
 }
 //proc
 var procDraw = function(){
-  //dra wbackground
+
+  //background
   ctx.fillStyle="white";
   ctx.fillRect(0,0,can.width, can.height);
-  //draw text
+
+  //grid line -----------------------
+  //get screen in world coordinate
+  var scr = [transPos([0,can.height], gS, gW), transPos([can.width,0], gS, gW)];
+  var L=Math.log10(scr[1][0]-scr[0][0]);
+  var intL=Math.floor(L);
+  var fracL=L-intL;
+  var intL =Math.pow(10,intL);
+  var fracL=Math.pow(10,fracL);
+  var depths = 3;
+  for(var depth=depths-1;depth>=0;depth--){
+    var qw = intL/Math.pow(10,depth);
+    var c = Math.floor(fracL*depth/depths*128+127);
+
+    ctx.lineWidth=1;
+    ctx.strokeStyle='rgb('+c+','+c+','+c+')';
+    for(var d=0;d<gW.dims;d++){
+      var q0 = Math.floor((scr[0][d])/qw)*qw;
+      var q1 = Math.ceil ((scr[1][d])/qw)*qw;
+
+      for(var q=q0;q<q1;q+=qw){
+        var wq = scr.clone();
+        wq[0][d]=q;
+        wq[1][d]=q;
+        var sq = [transPosInt(wq[0],gW,gS), transPosInt(wq[1],gW,gS)];
+        ctx.beginPath();
+        ctx.moveTo(sq[0][0],sq[0][1]);
+        ctx.lineTo(sq[1][0],sq[1][1]);
+        ctx.stroke();
+      }//q
+    }//depth
+  }//d
+
+  //draw entries
   ctx.strokeStyle='black';
   ctx.fillStyle='black';
   ctx.font = String(fontsize)+'px Segoe UI';
@@ -231,10 +275,7 @@ var handleMouseWheel = function(){
       gW.w[i][d] = (oldw[i][d]-pos[d])*Math.pow(1.1, -mouseWheel[1]/1000)+pos[d];
     }
   }
-  for(var d=0;d<gW.dims;d++){
-    gW.ww[d] = gW.w[1][d] - gW.w[0][d];
-    gW.iww[d] = 1/gW.ww[d];
-  }
+  gW.recalc();
   isRequestedDraw = true;
 }
 
