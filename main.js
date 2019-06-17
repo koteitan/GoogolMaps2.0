@@ -58,6 +58,8 @@ var initHtml=function(){
   }
 }
 
+var attributelist=['type','order','discoveryear','name','local','name','author','local','author','locale','expression','fgh','evolvedfrom','related','color','equal','definitionurl','isterminated'];
+var monthdays=[31,28,31,30,31,30,31,31,30,31,30,31];
 /* Entry object 
  * Entry is the object of each large number. 
  * line = response.feed.entry[n] */
@@ -70,7 +72,6 @@ var Entry=function(line){
       i--;
     }
   }
-  attributelist=['type','order','discoveryear','name','local','name','author','local','author','locale','expression','fgh','evolvedfrom','related','color','equal','definitionurl','isterminated'];
   for(var i=0;i<attributelist.length;i++){
     this[attributelist[i]]="";
   }
@@ -81,6 +82,25 @@ var Entry=function(line){
     }
   }
   this.order=parseInt(this.order);
+  if(typeof(this.discoveryear)==="number"){
+    this.discoveryear=this.discoveryear+""; //convert to string
+  }
+  if(this.discoveryear.length==4){
+    this.yeardate=new Date(this.discoveryear+"-12-31");
+  }else if(this.discoveryear.length==6){
+    this.yeardate=new Date(
+           this.discoveryear.substr(0,4)
+      +"-"+this.discoveryear.substr(4,2)
+      +"-"+(monthdays[parseInt(this.discoveryear.substr(4,2))])
+    );
+  }else{
+    this.yeardate=new Date(
+             this.discoveryear.substr(0,4)
+        +"-"+this.discoveryear.substr(4,2)
+        +"-"+this.discoveryear.substr(6,2)
+    );
+  }
+
   this.evolvedfrom=this.evolvedfrom.split("/");
   this.related=this.related.split("/");
 }
@@ -103,31 +123,35 @@ var Maps=function(list){
   for(var e=0;e<left.length;e++){
     left[e].i = e; // add index member
   }
-  var prevyear = 0;
+  var prevyear = new Date(-100000);
   while(left.length>0){ //loop until left is empty
     //find minimum
     var mine = 0;
     var minl = 0;
     for(var l=0;l<left.length;l++){
-      if(left[l].discoveryear<=left[minl].discoveryear){
+      if(left[l].yeardate<=left[minl].yeardate){
         mine = left[l].i;
         minl = l;
       }
     }
-    if(prevyear == left[minl].discoveryear){ // if same year
+    if(prevyear - left[minl].yeardate == 0){ // if same year
       //add mine into last array
       this.yearsort[this.yearsort.length-1].push(mine);
     }else{ // if different year
       //add new array
       this.yearsort.push([mine]);
     }
-    prevyear = left[minl].discoveryear;
+    prevyear = left[minl].yeardate;
     left = left.slice(0,minl).concat(left.slice(minl+1));
   }
   var years=this.yearsort.length;
+  var timewidth=list[this.yearsort[years-1][0]].yeardate.getTime()
+               -list[this.yearsort[    0  ][0]].yeardate.getTime();
+  var timeoldest=list[this.yearsort[    0  ][0]].yeardate.getTime();
   for(var y=0;y<years;y++){
     for(var e=0;e<this.yearsort[y].length;e++){
       list[this.yearsort[y][e]].x = y/years;
+      //list[this.yearsort[y][e]].x = (list[this.yearsort[y][e]].yeardate-timeoldest)/timewidth; //actual scale
     }
   }
   var orders = list[list.length-1].order +1;
@@ -232,6 +256,7 @@ var procDraw = function(){
     var text=document.getElementsByName('locale')[1].checked
       ?entry.localname
       :entry.name;
+    if(text.length>32){text=text.substring(0,32)+"...";}
     var tx = ctx.measureText(text).width;
     var ty = fontsize+radius;
     ctx.fillText(text, Math.floor(sq[0]-tx/2),
