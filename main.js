@@ -167,13 +167,7 @@ var initDraw=function(){
   renewgS();
 }
 var renewgS=function(){
-  var maxw=[can.width, can.height].max();
-  var minw=[can.width, can.height].min();
-  var maxd=[can.width, can.height].argmax();
-  var margin=(maxw-minw)/2;
-  var s=[[0,minw],[minw,0]];
-  s[0][maxd]+=margin;
-  s[1][maxd]+=margin;
+  var s=[[0,can.height],[can.width,0]];
   gS = new Geom(2,s);
 }
 //proc
