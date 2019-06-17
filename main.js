@@ -1,8 +1,8 @@
 // fields--------------------
 // maps
 var maps;
-//var spreadsheetId = "1-Mo_pc4HOavJucJfyIo-vkKKESnWEfjkkJJ4zTyfzjQ"; //for staging 
-var spreadsheetId = "11WH6PrhFAcdMEWSTjxSjZ7_rWHg-b8shAvSFn99bdyQ"; // for live
+//var spreadsheetId = "11WH6PrhFAcdMEWSTjxSjZ7_rWHg-b8shAvSFn99bdyQ"; // for live
+var spreadsheetId = "1foxx3dOYDwnyqQsxmhmcWV93xvCzOxX73GCg8Bv-kg0";
 var gW; /* world coordinate */
 //entry point--------------------
 window.onload = function(){
@@ -70,16 +70,22 @@ var Entry=function(line){
       i--;
     }
   }
-  var attributes="order,year,name,lname,author,lauthor,locale,expression,fgh,evolvedfrom,related,color".split(",");
-  for (var i=0;i<attributes.length;i++){
-    this[attributes[i]]  = col[i]?col[i].split(": ")[1]:"";
+  attributelist=['type','order','discoveryear','name','local','name','author','local','author','locale','expression','fgh','evolvedfrom','related','color','equal','definitionurl','isterminated'];
+  for(var i=0;i<attributelist.length;i++){
+    this[attributelist[i]]="";
+  }
+  for (var i=0;i<col.length;i++){
+    var a = col[i].split(":");
+    if(a.length>=2) {
+      this[a[0].trim()]=a[1].trim();
+    }
   }
   this.order=parseInt(this.order);
   this.evolvedfrom=this.evolvedfrom.split("/");
   this.related=this.related.split("/");
 }
 Entry.prototype.toString = function(){
-  return this.year + ":" + this.name + "(" + this.order + ")";
+  return this.discoveryear + ":" + this.name + "(" + this.order + ")";
 }
 /* Maps Object
  * Maps of the large nubmers.
@@ -103,19 +109,19 @@ var Maps=function(list){
     var mine = 0;
     var minl = 0;
     for(var l=0;l<left.length;l++){
-      if(left[l].year<=left[minl].year){
+      if(left[l].discoveryear<=left[minl].discoveryear){
         mine = left[l].i;
         minl = l;
       }
     }
-    if(prevyear == left[minl].year){ // if same year
+    if(prevyear == left[minl].discoveryear){ // if same year
       //add mine into last array
       this.yearsort[this.yearsort.length-1].push(mine);
     }else{ // if different year
       //add new array
       this.yearsort.push([mine]);
     }
-    prevyear = left[minl].year;
+    prevyear = left[minl].discoveryear;
     left = left.slice(0,minl).concat(left.slice(minl+1));
   }
   var years=this.yearsort.length;
@@ -230,7 +236,7 @@ var procDraw = function(){
 
     //text
     var text=document.getElementsByName('locale')[1].checked
-      ?entry.lname
+      ?entry.localname
       :entry.name;
     var tx = ctx.measureText(text).width;
     var ty = fontsize+radius;
