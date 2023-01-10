@@ -15,9 +15,9 @@ window.onload = function(){
 }
 //maps-------------------
 var initMaps=function(){
-  var url = "https://spreadsheets.google.com/feeds/list/" +
+  var url = "https://sheets.googleapis.com/v4/spreadsheets/" + 
           spreadsheetId +
-          "/od6/public/basic?alt=json";
+          "/values/sheet?key=AIzaSyC7snXkND495Hd_-p8iVrJVUtZkulEKVdw";
   $.get({
     url: url,
     success: function(response) {
